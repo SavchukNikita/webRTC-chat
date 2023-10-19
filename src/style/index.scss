@@ -1,0 +1,22 @@
+@import "variables.scss";
+@import "common/common";
+
+body {
+	background-color: $color-background;
+}
+
+canvas {
+	transform: rotateY(180deg);
+}
+
+.color-brand-1 {
+	color: $color-brand-1;
+}
+
+.color-brand-2 {
+	color: $color-brand-2;
+}
+
+.color-brand-3 {
+	color: $color-brand-3;
+}

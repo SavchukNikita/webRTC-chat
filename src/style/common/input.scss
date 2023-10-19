@@ -1,0 +1,12 @@
+.base-input {
+  padding: 8px 12px;
+  box-shadow: none;
+  border: 1px solid $color-brand-3;
+  border-radius: calc($base-border-radius / 2);
+  outline: none;
+
+  &:focus {
+    border-color: $color-brand-1_darken;
+    outline: 1px solid $color-brand-1_darken;
+  }
+}

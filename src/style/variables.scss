@@ -1,0 +1,25 @@
+@function darker($color, $tone) {
+  $adjust: -16*$tone;
+  @return adjust-color($color, $red: $adjust, $green: $adjust, $blue: $adjust);
+}
+
+
+// цвета
+$color-brand-1: #067bc2;
+$color-brand-2: #acecc4;
+$color-brand-3: #333333;
+
+$color-background: #f7f7f7;
+
+$color-brand-1_darken: darker($color-brand-1, 2);
+
+
+// шрифты
+$font-size-xs: 12px;
+$font-size-s: 16px;
+$font-size-m: 20px;
+$font-size-l: 24px;
+
+
+// константы px
+$base-border-radius: 16px;

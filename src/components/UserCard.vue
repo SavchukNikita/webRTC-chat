@@ -1,17 +1,15 @@
 <template>
 	<div class="user-card">
-		<canvas
-				ref="videoOutput"
+		<video
 				class="user-card__video-output"
-				width="400"
-				height="300"
-		></canvas>
+				ref="videoOutput"
+		></video>
 		<div class="user-card__name"></div>
 	</div>
 </template>
 
 <script lang="ts" setup>
-import {onMounted, ref, watch} from 'vue';
+import {onMounted, ref} from 'vue';
 import {useStream} from '../composables/use-stream';
 
 interface Props {
@@ -20,14 +18,15 @@ interface Props {
 
 const props = defineProps<Props>();
 
-const {streamVideoOnCanvas} = useStream();
+const {streamVideo} = useStream(props.userId);
 
-const videoOutput = ref<HTMLCanvasElement>();
+const videoOutput = ref<HTMLVideoElement>();
 
 
-onMounted(async () => {
-	streamVideoOnCanvas(videoOutput.value!);
+onMounted(() => {
+	streamVideo(videoOutput.value!);
 })
+
 </script>
 
 <style lang="scss">
@@ -37,8 +36,6 @@ onMounted(async () => {
 	align-items:      center;
 	justify-content:  center;
 	background-color: $color-brand-3;
-	width: 400px;
-	height: 300px;
 
 	&__name {
 		font-size: $font-size-xs;
@@ -48,7 +45,8 @@ onMounted(async () => {
 	}
 
 	&__video-output {
-
+		height: 100%;
+		width: 100%;
 	}
 }
 </style>

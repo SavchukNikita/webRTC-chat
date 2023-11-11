@@ -1,56 +1,40 @@
-import {ref} from 'vue';
+import {computed, MaybeRefOrGetter, ref, toValue, watch} from 'vue';
 
-export function useStream() {
 
-	const stream = ref<MediaStream>(new MediaStream());
+const streams = ref(new Map<string, MediaStream>());
 
-	const getStreamCallbacks: Function[] = [];
+export function setStream(key: string, stream: MediaStream) {
+	streams.value.set(key, stream);
+}
 
-	getSelfStream().then((s) => {
-		stream.value = s;
-
-		getStreamCallbacks.forEach((fn) => {
-			fn();
-		})
+export function useStream(streamId: string) {
+	const stream = computed<MediaStream>(() => {
+		return streams.value.get(streamId) ?? new MediaStream()
 	});
 
-	function getSelfStream(): Promise<MediaStream> {
-		return navigator.mediaDevices.getUserMedia({
-			video: true,
-			audio: false
-		});
-	}
+	const streamStartedCallback: Function[] = [];
 
-	function streamVideoOnCanvas(canvas: HTMLCanvasElement) {
+	function streamVideo(video: MaybeRefOrGetter<HTMLVideoElement>) {
 		if (!stream.value.active) {
-			getStreamCallbacks.push(() => streamVideoOnCanvas(canvas));
+			streamStartedCallback.push(() => streamVideo(video));
 
 			return;
 		}
 
-		const video = document.createElement('video');
+		const videoValue = toValue(video);
 
-		video.srcObject = stream.value;
-		video.play();
-		video.onloadeddata = () => {
-			const ctx = canvas.getContext('2d');
-
-			function draw() {
-				if (!ctx) {
-					return;
-				}
-
-				ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-
-				requestAnimationFrame(draw);
-			}
-
-			draw();
-		}
+		videoValue.srcObject = stream.value;
+		videoValue.play();
 	}
 
+
+	watch(stream, () => {
+		if (stream) {
+			streamStartedCallback.forEach((f) => f());
+		}
+	})
+
 	return {
-		getSelfStream,
-		streamVideoOnCanvas,
+		streamVideo,
 	}
 }

@@ -1,16 +1,8 @@
-import Peer, {DataConnection, MediaConnection} from 'peerjs';
-import {CallCB, ConnectionCB, StreamCB} from "../core/types/peer";
+import Peer, {MediaConnection} from 'peerjs';
 
 const peer = new Peer();
 
-const incomingCallCB: CallCB[] = [];
-const incomingConnCB: ConnectionCB[] = [];
-const incomingStreamCB: StreamCB[] = [];
-
 export function usePeer() {
-    function connect(id: string): DataConnection {
-        return peer.connect(id);
-    }
 
     function getId(): Promise<string> {
         return new Promise((resolve, reject) => {
@@ -26,73 +18,21 @@ export function usePeer() {
         });
     }
 
-    function openRoom(): Promise<string> {
-        return new Promise((resolve, reject) => {
-            try {
-                if (peer.open) {
-                    return resolve(peer.id);
-                }
-
-                peer.on('open', resolve);
-            } catch (err) {
-                reject(err);
-            }
-        });
+    function call(id: string, stream: MediaStream): MediaConnection {
+	    return peer.call(id, stream);
     }
 
-    function startCall(id: string, stream: MediaStream): MediaConnection {
-       const conn = peer.call(id, stream);
-
-       console.log('позвонили')
-
-       conn.on('stream', (stream) => {
-           incomingStreamCB.forEach((cb) => {
-               cb(stream);
-           })
-       });
-
-       return conn;
-
-    }
-
-    function registerIncomingCallCB(cb: CallCB) {
-        incomingCallCB.push(cb);
-    }
-
-    function registerIncomingConnectionCB(cb: ConnectionCB) {
-        incomingConnCB.push(cb);
-    }
-
-    function registerIncomingStreamCB(cb: StreamCB) {
-        incomingStreamCB.push(cb);
-    }
-
-    peer.on('connection', (d) => {
-        console.log('has connect', d);
-    });
-
-    peer.on('call', (call) => {
-        console.log('звонят');
-
-        call.on('stream', (stream) => {
-            console.log('стримим')
-            incomingStreamCB.forEach((cb) => {
-                cb(stream);
-            })
-        });
-
-        incomingCallCB.forEach((cb) => {
-            cb(call);
-        });
-    });
+	function listenIncomingCall(): Promise<MediaConnection> {
+		return new Promise((resolve) => {
+			peer.on('call', (call: MediaConnection) => {
+				resolve(call)
+			})
+		})
+	}
 
     return {
-        connect,
-        openRoom,
         getId,
-        startCall,
-        registerIncomingCallCB,
-        registerIncomingConnectionCB,
-        registerIncomingStreamCB,
+	    call,
+	    listenIncomingCall,
     }
 }

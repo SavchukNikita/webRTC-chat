@@ -3,12 +3,10 @@ import {useRouter} from 'vue-router';
 import {usePeer} from "../composables/use-peer";
 
 const {push} = useRouter();
-const {openRoom} = usePeer();
+const {getId} = usePeer();
 
 async function createRoom() {
-  const roomId = await openRoom();
-
-  console.log(roomId)
+  const roomId = await getId();
 
   await push({name: 'room', params: {roomId}});
 }
